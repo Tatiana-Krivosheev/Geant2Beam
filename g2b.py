@@ -17,7 +17,9 @@ def mm2cm(value):
 
 def load_events(filename, energy_thr = 0.01):
     """
-    load all events from a text file (W,E,X,Y,Z,WX,WY,WZ)
+    load all events from a text file (W,E,X,Y,Z,WX,WY,WZ), remove events with energy below threshold
+    :param filename: file name to load events from
+    :param energy_thr: energy threshold, events with energy below threshold will be thrown out
     """
     events = []
     
@@ -41,6 +43,9 @@ def load_events(filename, energy_thr = 0.01):
     
 def shift_back(e, zshift):
     """
+    Project back particles from current plane to plane shifted by zshift
+    :param e: an event
+    :param zshift: shift value, backward, in mm
     """
     X = e[2]
     Y = e[3]
@@ -87,7 +92,6 @@ def write_record_long(e, zshift, f):
         WT = np.float32(-WT)
     f.write(struct.pack("f", WT))
     
-#    ZLAST = np.float32(mm2cm(e[4]))
     ZLAST = np.float32(mm2cm(e[4] - 150.00)) # back by 150mm!
     f.write(struct.pack("f", ZLAST))
 
@@ -113,7 +117,7 @@ def write_beam_long(header, events, zshift, filename):
         tmp = np.float32(NINCP)
         f.write(struct.pack("f", tmp))
         
-        dummy = b"XXXXXXX"
+        dummy = b"XXXXXXX" # 7 bytes to fill header up to 32bytes
         f.write(dummy)
         
         for e in events:
