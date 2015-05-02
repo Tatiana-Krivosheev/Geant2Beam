@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-#
-# requires python 3.x. tested with 3.4.2
-#
 
 # all data are in mm, written out in cm
 
@@ -149,12 +146,11 @@ def make_header(nof_original, events):
     return (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
     
 
-events = load_events("../run25/photons")
+events = load_events("../GP3run15/photons")
 
 header = make_header(10000000000, events)
 (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP) = header
 
 print(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
 
-write_beam_long(header, events, 9.98, "Q25.egsphsp1")
-
+write_beam_long(header, events, 9.98, "Z15.egsphsp1")
