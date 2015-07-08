@@ -2,6 +2,7 @@
 
 # all data are in mm, written out in cm
 
+import sys
 import math
 import struct
 import numpy as np
@@ -145,12 +146,22 @@ def make_header(nof_original, events):
     
     return (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
     
+def main():
 
-events = load_events("../GP3run15/photons")
+    if len(sys.argv) < 3:
+        print("g2b input_fname output_phsf_name_without_extension")
+        return
 
-header = make_header(10000000000, events)
-(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP) = header
+    events = load_events(sys.argv[1])
 
-print(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
+    header = make_header(10000000000, events)
+    (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP) = header
 
-write_beam_long(header, events, 9.98, "Z15.egsphsp1")
+    print(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
+
+    write_beam_long(header, events, 0.0, sys.argv[2] + ".egsphsp1")
+
+if __name__ == '__main__':
+
+    main()
+
