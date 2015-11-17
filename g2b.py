@@ -21,7 +21,7 @@ def load_events(filename, energy_thr = 0.01):
     :param energy_thr: energy threshold, events with energy below threshold will be thrown out
     """
     events = []
-    
+
     with open(filename) as f:
         for line in f:
 
@@ -30,16 +30,16 @@ def load_events(filename, energy_thr = 0.01):
             e    = []
             for n in s:
                 e.append(float(n))
-                
+
             if len(e) == 8:
                 if e[1] >= energy_thr:
                     events.append(e)
-            
+
     if len(events) == 0:
         return None
-        
+
     return events
-    
+
 def shift_back(e, zshift):
     """
     Project back particles from current plane to plane shifted by zshift
@@ -57,7 +57,7 @@ def shift_back(e, zshift):
     wx = e[5]
     wy = e[6]
     wz = e[7]
-    
+
     s = 0.0
     if wz != 0.0:
         s = zshift / wz
@@ -65,31 +65,35 @@ def shift_back(e, zshift):
     return (x - wx*s, y - wy*s, z - wz*s)
 
     
-def write_record_long(e, zshift, f, Randomize = False):
+def write_record_long(e, zshift, f, randomize = False):
     """
     Write MODE2 PhSF particle record
+
+    :param e: an event
+    :param zshift: shift value, backward, in mm
+    :param f: file
     """
 
-    LATCH = 8388608
+    LATCH = 8388608 # magic value, check PIRS-509 for description of bits in LATCH bitmask
     f.write(struct.pack("i", LATCH))
 
     E = -np.float32(e[1])
     f.write(struct.pack("f", E))
 
-    if Randomize:
+    if randomize:
         rotate_particle(e)
     
     (xx, yy, zz) = shift_back(e, zshift)
 
     X = np.float32(mm2cm(xx))
     f.write(struct.pack("f", X))
-    
+
     Y = np.float32(mm2cm(yy))
     f.write(struct.pack("f", Y))
-    
+
     U = np.float32(e[5])
     f.write(struct.pack("f", U))
-    
+
     V = np.float32(e[6])
     f.write(struct.pack("f", V))
 
@@ -97,7 +101,7 @@ def write_record_long(e, zshift, f, Randomize = False):
     if e[7] < 0.0: # keep W sign
         WT = np.float32(-WT)
     f.write(struct.pack("f", WT))
-    
+
     ZLAST = np.float32(mm2cm(e[4] - 150.00)) # back by 150mm!
     f.write(struct.pack("f", ZLAST))
 
@@ -128,31 +132,22 @@ def rotate_particle(e):
     x = e[2]
     y = e[3]
 
-    #print(x, y)
-
     e[2], e[3] = rotate_2d( x, y, cs, sn )
-
-    #print(e[2], e[3])
     
     wx = e[5]
     wy = e[6]
-    
-    #print(wx, wy)
 
-    e[5], e[6] = rotate_2d( wx, wy, cs, sn )
-
-    #print(e[5], e[6])
-    
+    e[5], e[6] = rotate_2d( wx, wy, cs, sn )    
 
 def write_beam_long(header, events, zshift, filename, randomize):
     """
     Write BEAMnrc phase space file, MODE2 format
     """
-    
+
     (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP) = header
-    
+
     with open(filename, "wb") as f:
-        f.write(mode) 
+        f.write(mode)
         f.write(struct.pack("i", NPPHSP))
         f.write(struct.pack("i", NPHOTPHSP))
 
@@ -164,23 +159,26 @@ def write_beam_long(header, events, zshift, filename, randomize):
 
         tmp = np.float32(NINCP)
         f.write(struct.pack("f", tmp))
-        
+
         dummy = b"XXXXXXX" # 7 bytes to fill header up to 32bytes
         f.write(dummy)
-        
+
         for e in events:
             write_record_long(e, zshift, f, randomize)
 
 def make_header(nof_original, events):
     """
     Produce  from Geant data header for BeamNRC
+
+    :param nof_original: number of original events used to get events in G4 phase space file
+    :param events: all events from G4 phase space file
     """
     mode = b"MODE2"
-    
+
     NPPHSP = len(events) # total nof of particle records
 
     NPHOTPHSP =  len(events) # total nof of photon records
-    
+
     EKMAX = -1.0        # max kinetic energy, MeV
     EKMIN = 999999999.0 # min e- kinetic energy, MeV
     for e in events:
@@ -190,13 +188,16 @@ def make_header(nof_original, events):
         if energy < EKMIN:
             EKMIN = energy
             
-    #EKMIN = 0.183944478631 # from previous PhSF
+    EKMIN = 0.183944478631 # from previous PhSF
     
     NINCP = float(nof_original)
-    
+
     return (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
-    
+
 def main():
+    """
+    Process Geant phase space file and build BEAMnrc phase space file
+    """
 
     if len(sys.argv) < 3:
         print("g2b input_fname output_phsf_name_without_extension <optional number of original decays, 10bil default>")
