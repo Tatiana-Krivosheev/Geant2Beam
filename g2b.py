@@ -4,6 +4,7 @@
 
 import sys
 import math
+import random
 import struct
 import numpy as np
 
@@ -31,7 +32,7 @@ def load_events(filename, energy_thr = 0.01):
                 e.append(float(n))
                 
             if len(e) == 8:
-                if e[1] > energy_thr:
+                if e[1] >= energy_thr:
                     events.append(e)
             
     if len(events) == 0:
@@ -45,9 +46,13 @@ def shift_back(e, zshift):
     :param e: an event
     :param zshift: shift value, backward, in mm
     """
-    X = e[2]
-    Y = e[3]
-    Z = e[4]
+
+    if zshift == 0.0:
+        return (e[2], e[3], e[4])
+
+    x = e[2]
+    y = e[3]
+    z = e[4]
     
     wx = e[5]
     wy = e[6]
@@ -57,10 +62,10 @@ def shift_back(e, zshift):
     if wz != 0.0:
         s = zshift / wz
         
-    return (X-wx*s, Y-wy*s, Z-wz*s)
+    return (x - wx*s, y - wy*s, z - wz*s)
 
     
-def write_record_long(e, zshift, f):
+def write_record_long(e, zshift, f, Randomize = False):
     """
     Write MODE2 PhSF particle record
     """
@@ -70,6 +75,9 @@ def write_record_long(e, zshift, f):
 
     E = -np.float32(e[1])
     f.write(struct.pack("f", E))
+
+    if Randomize:
+        rotate_particle(e)
     
     (xx, yy, zz) = shift_back(e, zshift)
 
@@ -93,8 +101,50 @@ def write_record_long(e, zshift, f):
     ZLAST = np.float32(mm2cm(e[4] - 150.00)) # back by 150mm!
     f.write(struct.pack("f", ZLAST))
 
+def rotate_2d( x, y, cs, sn ):
+    """
+    rotate x, y in he plane given angle sine and cosine
+    """
 
-def write_beam_long(header, events, zshift, filename):
+    return (cs*x + sn*y, -sn*x + cs*y)
+
+def random_angle():
+    """
+    sample random angle in azimuth, return tuple of (cos, sin)
+    """
+    phi = 2.0 * math.pi * random.random()
+    cs  = math.cos( phi )
+    sn  = math.sin( phi )
+
+    return (cs, sn)
+
+def rotate_particle(e):
+    """
+    Given particle phase space coordinates, rotate in XY plane
+    """
+
+    cs, sn = random_angle()
+
+    x = e[2]
+    y = e[3]
+
+    #print(x, y)
+
+    e[2], e[3] = rotate_2d( x, y, cs, sn )
+
+    #print(e[2], e[3])
+    
+    wx = e[5]
+    wy = e[6]
+    
+    #print(wx, wy)
+
+    e[5], e[6] = rotate_2d( wx, wy, cs, sn )
+
+    #print(e[5], e[6])
+    
+
+def write_beam_long(header, events, zshift, filename, randomize):
     """
     Write BEAMnrc phase space file, MODE2 format
     """
@@ -119,8 +169,8 @@ def write_beam_long(header, events, zshift, filename):
         f.write(dummy)
         
         for e in events:
-            write_record_long(e, zshift, f)
-    
+            write_record_long(e, zshift, f, randomize)
+
 def make_header(nof_original, events):
     """
     Produce  from Geant data header for BeamNRC
@@ -140,7 +190,7 @@ def make_header(nof_original, events):
         if energy < EKMIN:
             EKMIN = energy
             
-    EKMIN = 0.183944478631 # from previous PhSF
+    #EKMIN = 0.183944478631 # from previous PhSF
     
     NINCP = float(nof_original)
     
@@ -149,19 +199,27 @@ def make_header(nof_original, events):
 def main():
 
     if len(sys.argv) < 3:
-        print("g2b input_fname output_phsf_name_without_extension")
+        print("g2b input_fname output_phsf_name_without_extension <optional number of original decays, 10bil default>")
         return
 
-    events = load_events(sys.argv[1])
+    nof_decays = 10000000000
+    try:
+        n = int(sys.argv[3])
+        nof_decays = n
+    except:
+        pass
 
-    header = make_header(10000000000, events)
+    events = load_events(sys.argv[1])
+    
+    header = make_header(nof_decays, events)
     (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP) = header
 
     print(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
 
-    write_beam_long(header, events, 0.0, sys.argv[2] + ".egsphsp1")
+    write_beam_long(header, events, 0.0, sys.argv[2] + ".egsphsp1", False)
+    
+    return 0
 
 if __name__ == '__main__':
 
-    main()
-
+    sys.exit(main())
