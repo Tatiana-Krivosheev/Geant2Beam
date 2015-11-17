@@ -188,7 +188,7 @@ def make_header(nof_original, events):
         if energy < EKMIN:
             EKMIN = energy
             
-    EKMIN = 0.183944478631 # from previous PhSF
+    #EKMIN = 0.183944478631 # from previous PhSF
     
     NINCP = float(nof_original)
 
