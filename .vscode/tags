@@ -5,7 +5,7 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 g2b.py	../g2b.py	1;"	kind:file	line:1
-load_events	../text_loader.py	/^def load_events(filename, energy_thr = 0.01):$/;"	kind:function	line:3
+load_events	../text_loader.py	/^def load_events(filename, energy_thr = 0.01, nof_events = -1):$/;"	kind:function	line:3
 main	../g2b.py	/^def main():$/;"	kind:function	line:171
 make_header	../g2b.py	/^def make_header(nof_original, events):$/;"	kind:function	line:143
 mm2cm	../g2b.py	/^def mm2cm(value):$/;"	kind:function	line:11

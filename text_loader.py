@@ -9,6 +9,11 @@ def load_events(filename, energy_thr = 0.01, nof_events = -1):
     events = []
 
     k = 0
+
+    nof_photons   = 0
+    nof_electrons = 0
+    nof_positrons = 0
+
     with open(filename, "r+") as f:
         for line in f:
 
@@ -17,8 +22,19 @@ def load_events(filename, energy_thr = 0.01, nof_events = -1):
             s = line.split()
             s = [x for x in s if x]  # remove empty lines
 
-            if "GGG" not in s[0]:
+            tag = s[0]
+            if "EEE" in tag:
+                nof_electrons += 1
                 continue
+
+            if "PPP" in tag:
+                nof_positrons += 1
+                continue
+
+            if "GGG" not in tag:
+                continue
+
+            nof_photons += 1
 
             WT = float(s[1])
             E  = float(s[2])
@@ -33,7 +49,7 @@ def load_events(filename, energy_thr = 0.01, nof_events = -1):
             WY = float(s[7])
             WZ = float(s[8])
 
-            e = (W,E,X,Y,Z,WX,WY,WZ)
+            e = (WT, E, X, Y, Z, WX, WY, WZ)
             events.append(e)
 
             k += 1
@@ -41,4 +57,4 @@ def load_events(filename, energy_thr = 0.01, nof_events = -1):
                 if k == nof_events:
                     break
 
-    return events if len(events) > 0 else None
+    return (events, nof_photons, nof_electrons, nof_positrons) if len(events) > 0 else None

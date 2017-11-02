@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
-# all data are in mm, written out in cm
-
 import sys
 import math
 import random
 import struct
 import numpy as np
 
+
+# all data are in mm, written out in cm
 def mm2cm(value):
     """
     Converts mm to cm
     """
     return value*0.1
+
 
 def shift_back(e, zshift):
     """
@@ -20,7 +21,6 @@ def shift_back(e, zshift):
     :param e: an event
     :param zshift: shift value, backward, in mm
     """
-
     if zshift == 0.0:
         return (e[2], e[3], e[4])
 
@@ -79,12 +79,14 @@ def write_record_long(e, zshift, f, randomize = False):
     ZLAST = np.float32(mm2cm(e[4] - 150.00)) # back by 150mm!
     f.write(struct.pack("f", ZLAST))
 
+
 def rotate_2d( x, y, cs, sn ):
     """
     rotate x, y in he plane given angle sine and cosine
     """
 
     return (cs*x + sn*y, -sn*x + cs*y)
+
 
 def random_angle():
     """
@@ -95,6 +97,7 @@ def random_angle():
     sn  = math.sin( phi )
 
     return (cs, sn)
+
 
 def rotate_particle(e):
     """
@@ -112,6 +115,7 @@ def rotate_particle(e):
     wy = e[6]
 
     e[5], e[6] = rotate_2d( wx, wy, cs, sn )
+
 
 def write_beam_long(header, events, zshift, filename, randomize):
     """
@@ -139,6 +143,7 @@ def write_beam_long(header, events, zshift, filename, randomize):
 
         for e in events:
             write_record_long(e, zshift, f, randomize)
+
 
 def make_header(nof_original, events):
     """
@@ -168,14 +173,33 @@ def make_header(nof_original, events):
 
     return (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
 
-def main():
+
+def main(input_fname, output_fname, nof_decays):
     """
-    Process Geant phase space file and build BEAMnrc phase space file
+    Given file name, process Geant phase space file and build BEAMnrc phase space file
     """
 
+    events, nof_photons, nof_electrons, nof_positrons = text_loader.load_events(input_fname)
+
+    header = make_header(nof_decays, events)
+    (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP) = header
+
+    print(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
+
+    write_beam_long(header, events, 0.0, output_fname + ".egsphsp1", False)
+
+    return 0
+
+
+if __name__ == '__main__':
+
     if len(sys.argv) < 3:
-        print("g2b input_fname output_phsf_name_without_extension <optional number of original decays, 10bil default>")
+        print("g2b input_fname output_phsf_name_without_extension <optional number of original decays, 10billion default>")
         return
+
+    input_fname = sys.argv[1]
+
+    output_fname = sys.argv[2]
 
     nof_decays = 10000000000
     try:
@@ -184,17 +208,6 @@ def main():
     except:
         pass
 
-    events = text_loader.load_events(sys.argv[1])
+    rc = main(input_fname, output_fname, nof_decays)
 
-    header = make_header(nof_decays, events)
-    (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP) = header
-
-    print(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
-
-    write_beam_long(header, events, 0.0, sys.argv[2] + ".egsphsp1", False)
-
-    return 0
-
-if __name__ == '__main__':
-
-    sys.exit(main())
+    sys.exit(rc)
