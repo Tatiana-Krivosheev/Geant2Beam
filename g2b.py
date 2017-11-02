@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # all data are in mm, written out in cm
 
@@ -14,32 +14,6 @@ def mm2cm(value):
     """
     return value*0.1
 
-def load_events(filename, energy_thr = 0.01):
-    """
-    load all events from a text file (W,E,X,Y,Z,WX,WY,WZ), remove events with energy below threshold
-    :param filename: file name to load events from
-    :param energy_thr: energy threshold, events with energy below threshold will be thrown out
-    """
-    events = []
-
-    with open(filename) as f:
-        for line in f:
-
-            line = line.strip()
-            s    = line.split()
-            e    = []
-            for n in s:
-                e.append(float(n))
-
-            if len(e) == 8:
-                if e[1] >= energy_thr:
-                    events.append(e)
-
-    if len(events) == 0:
-        return None
-
-    return events
-
 def shift_back(e, zshift):
     """
     Project back particles from current plane to plane shifted by zshift
@@ -53,7 +27,7 @@ def shift_back(e, zshift):
     x = e[2]
     y = e[3]
     z = e[4]
-    
+
     wx = e[5]
     wy = e[6]
     wz = e[7]
@@ -61,10 +35,10 @@ def shift_back(e, zshift):
     s = 0.0
     if wz != 0.0:
         s = zshift / wz
-        
+
     return (x - wx*s, y - wy*s, z - wz*s)
 
-    
+
 def write_record_long(e, zshift, f, randomize = False):
     """
     Write MODE2 PhSF particle record
@@ -82,7 +56,7 @@ def write_record_long(e, zshift, f, randomize = False):
 
     if randomize:
         rotate_particle(e)
-    
+
     (xx, yy, zz) = shift_back(e, zshift)
 
     X = np.float32(mm2cm(xx))
@@ -133,11 +107,11 @@ def rotate_particle(e):
     y = e[3]
 
     e[2], e[3] = rotate_2d( x, y, cs, sn )
-    
+
     wx = e[5]
     wy = e[6]
 
-    e[5], e[6] = rotate_2d( wx, wy, cs, sn )    
+    e[5], e[6] = rotate_2d( wx, wy, cs, sn )
 
 def write_beam_long(header, events, zshift, filename, randomize):
     """
@@ -187,9 +161,9 @@ def make_header(nof_original, events):
             EKMAX = energy
         if energy < EKMIN:
             EKMIN = energy
-            
+
     #EKMIN = 0.183944478631 # from previous PhSF
-    
+
     NINCP = float(nof_original)
 
     return (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
@@ -210,15 +184,15 @@ def main():
     except:
         pass
 
-    events = load_events(sys.argv[1])
-    
+    events = text_loader.load_events(sys.argv[1])
+
     header = make_header(nof_decays, events)
     (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP) = header
 
     print(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
 
     write_beam_long(header, events, 0.0, sys.argv[2] + ".egsphsp1", False)
-    
+
     return 0
 
 if __name__ == '__main__':

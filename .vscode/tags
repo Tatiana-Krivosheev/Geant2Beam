@@ -1,0 +1,18 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+g2b.py	../g2b.py	1;"	kind:file	line:1
+load_events	../text_loader.py	/^def load_events(filename, energy_thr = 0.01):$/;"	kind:function	line:3
+main	../g2b.py	/^def main():$/;"	kind:function	line:171
+make_header	../g2b.py	/^def make_header(nof_original, events):$/;"	kind:function	line:143
+mm2cm	../g2b.py	/^def mm2cm(value):$/;"	kind:function	line:11
+random_angle	../g2b.py	/^def random_angle():$/;"	kind:function	line:89
+rotate_2d	../g2b.py	/^def rotate_2d( x, y, cs, sn ):$/;"	kind:function	line:82
+rotate_particle	../g2b.py	/^def rotate_particle(e):$/;"	kind:function	line:99
+shift_back	../g2b.py	/^def shift_back(e, zshift):$/;"	kind:function	line:17
+text_loader.py	../text_loader.py	1;"	kind:file	line:1
+write_beam_long	../g2b.py	/^def write_beam_long(header, events, zshift, filename, randomize):$/;"	kind:function	line:116
+write_record_long	../g2b.py	/^def write_record_long(e, zshift, f, randomize = False):$/;"	kind:function	line:42
