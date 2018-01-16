@@ -6,6 +6,8 @@ import random
 import struct
 import numpy as np
 
+import text_loader
+
 
 # all data are in mm, written out in cm
 def mm2cm(value):
@@ -179,14 +181,15 @@ def main(input_fname, output_fname, nof_decays):
     Given file name, process Geant phase space file and build BEAMnrc phase space file
     """
 
-    events, nof_photons, nof_electrons, nof_positrons = text_loader.load_events(input_fname)
+    events, nof_photons, nof_electrons, nof_positrons = text_loader.load_events(input_fname, 0.0001)
+    print("{0} photons loaded, {1} electrons loaded, {2} positrons loaded".format(nof_photons, nof_electrons, nof_positrons))
 
     header = make_header(nof_decays, events)
     (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP) = header
 
     print(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
 
-    write_beam_long(header, events, 0.0, output_fname + ".egsphsp1", False)
+    write_beam_long(header, events, 2.5, output_fname + ".egsphsp1", False)
 
     return 0
 
@@ -195,7 +198,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 3:
         print("g2b input_fname output_phsf_name_without_extension <optional number of original decays, 10billion default>")
-        return
+        sys.exit(0)
 
     input_fname = sys.argv[1]
 

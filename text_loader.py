@@ -39,7 +39,7 @@ def load_events(filename, energy_thr = 0.01, nof_events = -1):
             WT = float(s[1])
             E  = float(s[2])
             if E < energy_thr:
-                break
+                continue
 
             X = float(s[3])
             Y = float(s[4])
