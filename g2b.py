@@ -176,7 +176,7 @@ def make_header(nof_original, events):
     return (mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
 
 
-def main(input_fname, output_fname, nof_decays):
+def main(input_fname, output_fname, nof_decays, shift):
     """
     Given file name, process Geant phase space file and build BEAMnrc phase space file
     """
@@ -189,7 +189,7 @@ def main(input_fname, output_fname, nof_decays):
 
     print(mode, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP)
 
-    write_beam_long(header, events, 2.5, output_fname + ".egsphsp1", False)
+    write_beam_long(header, events, shift, output_fname + ".egsphsp1", False)
 
     return 0
 
@@ -211,6 +211,6 @@ if __name__ == '__main__':
     except:
         pass
 
-    rc = main(input_fname, output_fname, nof_decays)
+    rc = main(input_fname, output_fname, nof_decays, -2.5)
 
     sys.exit(rc)
