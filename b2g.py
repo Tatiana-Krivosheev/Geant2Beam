@@ -73,7 +73,7 @@ def main(phsf, filename, Zsrc = 0.0, Zdst = 0.0):
     events, nof_photons, nof_electrons, nof_positrons = beam_loader.load_events(phsf)
     print("{0} photons loaded, {1} electrons loaded, {2} positrons loaded".format(nof_photons, nof_electrons, nof_positrons))
 
-    write_g4_file(events, filename)
+    write_g4_file(events, filename, Zsrc, Zdst)
 
     return 0
 

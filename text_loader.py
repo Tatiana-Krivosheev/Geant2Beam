@@ -22,6 +22,11 @@ def load_events(filename, energy_thr = 0.01, nof_events = -1):
             s = line.split()
             s = [x for x in s if x]  # remove empty lines
 
+            if s is None:
+                continue
+            if len(s) == 0:
+                continue
+
             tag = s[0]
             if "EEE" in tag:
                 nof_electrons += 1

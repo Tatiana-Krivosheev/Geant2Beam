@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 r"""
-Load events from BEAM phsp file 
+Load events from BEAM phsp file
 """
 
 import math
@@ -129,6 +129,7 @@ def load_events(filename, nof_events = -1):
     with open(filename, "rb") as phsf:
 
         m, NPPHSP, NPHOTPHSP, EKMAX, EKMIN, NINCP = read_header(phsf)
+        print(NINCP)
 
         if nof_events < 0:
             nof_events = NPPHSP
